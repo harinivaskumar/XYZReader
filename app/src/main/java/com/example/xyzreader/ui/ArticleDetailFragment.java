@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.graphics.Palette;
 import android.text.Html;
@@ -53,6 +54,7 @@ public class ArticleDetailFragment extends Fragment implements
     private int mScrollY;
     private boolean mIsCard = false;
     private int mStatusBarFullOpacityBottom;
+    private FloatingActionButton mFloatingActionButton;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -127,16 +129,7 @@ public class ArticleDetailFragment extends Fragment implements
 
         mStatusBarColorDrawable = new ColorDrawable(0);
 
-        mRootView.findViewById(R.id.share_fab).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(Intent.createChooser(ShareCompat.IntentBuilder.from(getActivity())
-                        .setType("text/plain")
-                        .setText("Some sample text")
-                        .getIntent(), getString(R.string.action_share)));
-            }
-        });
-
+        mFloatingActionButton = (FloatingActionButton) mRootView.findViewById(R.id.share_fab);
         bindViews();
         updateStatusBar();
         return mRootView;
@@ -215,6 +208,8 @@ public class ArticleDetailFragment extends Fragment implements
 
                         }
                     });
+
+            shareContent();
         } else {
             mRootView.setVisibility(View.GONE);
             titleView.setText("N/A");
@@ -262,5 +257,27 @@ public class ArticleDetailFragment extends Fragment implements
         return mIsCard
                 ? (int) mPhotoContainerView.getTranslationY() + mPhotoView.getHeight() - mScrollY
                 : mPhotoView.getHeight() - mScrollY;
+    }
+
+    private void shareContent(){
+        final String articleTitle = mCursor.getString(ArticleLoader.Query.TITLE);
+        final String articleBody = mCursor.getString(ArticleLoader.Query.BODY);
+
+        mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(Intent
+                        .createChooser(
+                                ShareCompat
+                                        .IntentBuilder
+                                        .from(getActivity())
+                                        .setType("text/plain")
+                                        .setSubject(articleTitle)
+                                        .setText(articleBody)
+                                        .getIntent(),
+                                getString(R.string.action_share))
+                );
+            }
+        });
     }
 }
